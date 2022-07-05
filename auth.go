@@ -92,11 +92,22 @@ func (a *authSettings) open(authCode string) error {
 			return err
 		}
 
+		log.Debugf("Получены данные об авторизации в АМО: %+v", ret)
+
 		client.accessToken = ret.AccessToken
+
+		log.Debugf("Получен новый access_token: %s", client.accessToken)
+		log.Debugf("Получен новый refresh_token: %s", ret.RefreshToken)
+		log.Debugf("Получено новое время жизни access_token: %d", ret.ExpiresIn)
+
+		exprIn := time.Now().Add(time.Duration(ret.ExpiresIn) * time.Second).Add(-1 * time.Minute)
+
+		log.Debugf("Время жизни access_token истекает: %s", exprIn)
+
 		amoAuthorizationData = AuthorizationData{
 			AppName:      a.storage.AppName,
 			RefreshToken: ret.RefreshToken,
-			ExpiresIn:    time.Now().Add(time.Duration(ret.ExpiresIn)*time.Second - 1*time.Minute),
+			ExpiresIn:    exprIn,
 		}
 
 		err = a.storage.DB.Table(a.storage.TableName).Create(&amoAuthorizationData).Error
