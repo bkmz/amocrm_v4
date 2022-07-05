@@ -39,7 +39,7 @@ type authRequest struct {
 	RedirectUri  string             `json:"redirect_uri"`
 }
 
-var client *authSettings
+var client authSettings
 
 func (a *authSettings) getUrl(path string) string {
 	return fmt.Sprintf("%s%s", a.endpoint, path)
@@ -53,6 +53,10 @@ func createConnection(init *InitAmoConfig, storage *AuthAmoStorageConfig) error 
 	client.client = http.Client{}
 	client.storage = storage
 
+	err := client.open(init.Code)
+	if err != nil {
+		return err
+	}
 	// запускаем фоновую задачу для обновления access_token
 	go client.refresher()
 
