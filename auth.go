@@ -73,7 +73,7 @@ func (a *authSettings) open(authCode string) error {
 	}
 
 	if result.RowsAffected == 0 {
-		ret := authResp{}
+		var ret = authResp{}
 		opts := requestOpts{
 			Method: http.MethodPost,
 			Path:   "/oauth2/access_token",
@@ -84,7 +84,7 @@ func (a *authSettings) open(authCode string) error {
 				Code:         authCode,
 				RedirectUri:  a.redirectUri,
 			},
-			Ret: ret,
+			Ret: &ret,
 		}
 
 		err := httpRequest(opts)
@@ -126,7 +126,7 @@ func (a *authSettings) open(authCode string) error {
 				RefreshToken: amoAuthorizationData.RefreshToken,
 				RedirectUri:  a.redirectUri,
 			},
-			Ret: ret,
+			Ret: &ret,
 		}
 
 		err := httpRequest(opts)
@@ -173,7 +173,7 @@ func (a *authSettings) refresher() {
 						RefreshToken: auth.RefreshToken,
 						RedirectUri:  a.redirectUri,
 					},
-					Ret: ret,
+					Ret: &ret,
 				}
 				err = httpRequest(opts)
 				if err != nil {
