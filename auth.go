@@ -50,6 +50,7 @@ func createConnection(init *InitAmoConfig, storage *AuthAmoStorageConfig) error 
 	client.endpoint = fmt.Sprintf("https://%s.amocrm.com", init.Domain)
 	client.integrationID = init.ClientID
 	client.integrationSecret = init.ClientSecret
+	client.redirectUri = init.RedirectURI
 	client.client = http.Client{}
 	client.storage = storage
 
