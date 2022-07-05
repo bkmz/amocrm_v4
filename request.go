@@ -64,16 +64,16 @@ func httpRequest(opts requestOpts) error {
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
-	}
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 
 	log.Debugf("Response Body: %s", string(body))
+
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
 
 	err = json.Unmarshal(body, &opts.Ret)
 	if err != nil {
