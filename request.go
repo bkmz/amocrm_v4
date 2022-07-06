@@ -44,7 +44,7 @@ func httpRequest(opts requestOpts) error {
 	log.Debugf("URL Parameters: %s", values.Encode())
 	log.Debugf("Body Parameters: %s", buf.String())
 
-	req, err := http.NewRequest(http.MethodPost, client.getUrl(opts.Path), &buf)
+	req, err := http.NewRequest(opts.Method, client.getUrl(opts.Path), &buf)
 	if err != nil {
 		return err
 	}
