@@ -76,7 +76,11 @@ func httpRequest(opts requestOpts) error {
 
 	log.Debugf("Response Body: %s", string(body))
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode == http.StatusNoContent {
+		return nil
+	}
+
+	if resp.StatusCode != http.StatusOK {
 		return errors.New(resp.Status)
 	}
 

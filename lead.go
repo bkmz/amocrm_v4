@@ -37,12 +37,8 @@ type lead struct {
 	CustomFieldsValues interface{} `json:"custom_fields_values"`
 	Score              interface{} `json:"score"`
 	AccountId          int         `json:"account_id"`
-	Links              struct {
-		Self struct {
-			Href string `json:"href"`
-		} `json:"self"`
-	} `json:"_links"`
-	Embedded struct {
+	Links              links       `json:"_links"`
+	Embedded           struct {
 		Tags      []interface{} `json:"tags"`
 		Companies []interface{} `json:"companies"`
 	} `json:"_embedded"`
