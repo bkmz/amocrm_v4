@@ -59,8 +59,11 @@ func httpRequest(opts requestOpts) error {
 	log.Debugf("Request: %+v", req)
 
 	resp, err := client.client.Do(req)
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
+
+	log.Debugf("Response: %+v", resp)
+
+	defer func(body io.ReadCloser) {
+		err := body.Close()
 		if err != nil {
 			log.Errorf("Ошибка при закрытии потока ответа: %v", err)
 		}
