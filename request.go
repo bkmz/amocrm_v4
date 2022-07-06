@@ -57,6 +57,8 @@ func httpRequest(opts requestOpts) error {
 
 	log.Debugf("Request Headers: %s", req.Header)
 
+	log.Debugf("Request: %+v", req)
+
 	resp, err := client.client.Do(req)
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
