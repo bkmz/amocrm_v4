@@ -103,6 +103,16 @@ func (l Ld) ByID(id int) (*lead, error) {
 	return ld, nil
 }
 
+func (ld *lead) Notes(params *GetNotesQueryParams) ([]*leadNote, error) {
+	notes, err := ld.noteMultiplyRequest(params)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return notes, nil
+}
+
 func (l Ld) multiplyRequest(params *GetLeadsQueryParams) ([]*lead, error) {
 	var leads []*lead
 
@@ -131,16 +141,6 @@ func (l Ld) multiplyRequest(params *GetLeadsQueryParams) ([]*lead, error) {
 	}
 
 	return leads, nil
-}
-
-func (ld *lead) Notes(params *GetNotesQueryParams) ([]*leadNote, error) {
-	notes, err := ld.noteMultiplyRequest(params)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return notes, nil
 }
 
 func (ld *lead) noteMultiplyRequest(opts *GetNotesQueryParams) ([]*leadNote, error) {

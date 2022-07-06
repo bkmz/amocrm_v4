@@ -114,14 +114,8 @@ func (c Ct) ByID(id int, with []ContactWithType) (*contact, error) {
 	return ct, nil
 }
 
-func (ct *contact) Notes() ([]*contactNote, error) {
-	var notes []*contactNote
-
-	err := httpRequest(requestOpts{
-		Method: http.MethodGet,
-		Path:   fmt.Sprintf("/api/v4/contacts/%d/notes", ct.Id),
-		Ret:    &notes,
-	})
+func (ct *contact) Notes(params *GetNotesQueryParams) ([]*contactNote, error) {
+	notes, err := ct.noteMultiplyRequest(params)
 	if err != nil {
 		return nil, err
 	}
