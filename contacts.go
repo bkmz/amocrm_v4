@@ -59,7 +59,9 @@ func (c Cntct) Create() *contact {
 }
 
 func (c Cntct) All() ([]*contact, error) {
-	contacts, err := c.multiplyRequest(GetContactsOpts{})
+	contacts, err := c.multiplyRequest(GetContactsOpts{
+		Limit: 250,
+	})
 	if err != nil {
 		return nil, err
 	}
