@@ -47,7 +47,7 @@ func (a *authSettings) getUrl(path string) string {
 
 func createConnection(init *InitAmoConfig, storage *AuthAmoStorageConfig) error {
 	// Проверяем наличие записи в таблице с данными об авторизации в АМО
-	client.endpoint = fmt.Sprintf("https://%s.amocrm.com", init.Domain)
+	client.endpoint = fmt.Sprintf("https://%s.amocrm.ru", init.Domain)
 	client.integrationID = init.ClientID
 	client.integrationSecret = init.ClientSecret
 	client.redirectUri = init.RedirectURI
