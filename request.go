@@ -49,10 +49,10 @@ func httpRequest(opts requestOpts) error {
 		return err
 	}
 
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Content-Type", "application/json")
 
 	if opts.Path != "/oauth2/access_token" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", client.accessToken))
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", client.accessToken))
 	}
 
 	log.Debugf("Request Headers: %s", req.Header)
