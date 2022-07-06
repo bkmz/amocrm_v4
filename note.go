@@ -1,7 +1,5 @@
 package amocrm_v4
 
-import "net/http"
-
 type NoteType string
 type MessageCashierNoteStatusType string
 
@@ -57,17 +55,17 @@ type noteParams struct {
 	Attachment   string                       `json:"attachment,omitempty"`
 }
 
-type getNotesQueryParams struct {
-	entityType        string      `url:"-"`
-	entityId          int         `url:"-"`
-	path              string      `url:"-"`
-	page              int         `url:"page,omitempty"`
-	limit             int         `url:"limit,omitempty"`
-	filter            interface{} `url:"filter,omitempty"`
-	filterById        interface{} `url:"filter[id],omitempty"`
-	filterByNoteType  interface{} `url:"filter[note_type],omitempty"`
-	filterByUpdatedAt interface{} `url:"filter[updated_at],omitempty"`
-	order             interface{} `url:"order,omitempty"`
+type GetNotesQueryParams struct {
+	//entityType        string      `url:"-"`
+	//entityId          int         `url:"-"`
+	//path              string      `url:"-"`
+	Page              int         `url:"page,omitempty"`
+	Limit             int         `url:"limit,omitempty"`
+	Filter            interface{} `url:"filter,omitempty"`
+	FilterById        interface{} `url:"filter[id],omitempty"`
+	FilterByNoteType  interface{} `url:"filter[note_type],omitempty"`
+	FilterByUpdatedAt interface{} `url:"filter[updated_at],omitempty"`
+	Order             interface{} `url:"order,omitempty"`
 }
 
 type allNotes struct {
@@ -78,39 +76,30 @@ type allNotes struct {
 	} `json:"_embedded"`
 }
 
-func noteMultiplyRequest(params getNotesQueryParams) ([]*note, error) {
-	var notes []*note
-
-	for {
-		var tmpNotes allNotes
-
-		err := httpRequest(requestOpts{
-			Method:        http.MethodGet,
-			Path:          params.path,
-			URLParameters: &params,
-			Ret:           &tmpNotes,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		notes = append(notes, tmpNotes.Embedded.Notes...)
-
-		if len(tmpNotes.Links.Next.Href) > 0 {
-			params.page = tmpNotes.Page + 1
-		} else {
-			break
-		}
-	}
-
-	return notes, nil
-}
-
-func (nt *note) Delete() error {
-	return httpRequest(requestOpts{
-		Method:        http.MethodDelete,
-		Path:          "/api/v4/notes/" + string(nt.Id),
-		URLParameters: nil,
-		Ret:           nil,
-	})
-}
+//func noteMultiplyRequest(params GetNotesQueryParams) ([]*note, error) {
+//	var notes []*note
+//
+//	for {
+//		var tmpNotes allNotes
+//
+//		err := httpRequest(requestOpts{
+//			Method:        http.MethodGet,
+//			Path:          params.path,
+//			URLParameters: &params,
+//			Ret:           &tmpNotes,
+//		})
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		notes = append(notes, tmpNotes.Embedded.Notes...)
+//
+//		if len(tmpNotes.Links.Next.Href) > 0 {
+//			params.page = tmpNotes.Page + 1
+//		} else {
+//			break
+//		}
+//	}
+//
+//	return notes, nil
+//}

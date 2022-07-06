@@ -114,13 +114,8 @@ func (l Ld) multiplyRequest(opts getContactsQueryParams) ([]*lead, error) {
 	return leads, nil
 }
 
-func (ld *lead) Notes(params *getNotesQueryParams) ([]*leadNote, error) {
-	path := fmt.Sprintf("/api/v4/leads/%d/notes", ld.Id)
-
-	notes, err := ld.noteMultiplyRequest(getNotesQueryParams{
-		limit: 250,
-		path:  path,
-	})
+func (ld *lead) Notes(params *GetNotesQueryParams) ([]*leadNote, error) {
+	notes, err := ld.noteMultiplyRequest(params)
 
 	if err != nil {
 		return nil, err
@@ -129,15 +124,19 @@ func (ld *lead) Notes(params *getNotesQueryParams) ([]*leadNote, error) {
 	return notes, nil
 }
 
-func (ld *lead) noteMultiplyRequest(opts getNotesQueryParams) ([]*leadNote, error) {
+func (ld *lead) noteMultiplyRequest(opts *GetNotesQueryParams) ([]*leadNote, error) {
 	var notes []*leadNote
+
+	if opts.Limit == 0 {
+		opts.Limit = 250
+	}
 
 	for {
 		var tmpNotes []*leadNote
 
 		err := httpRequest(requestOpts{
 			Method:        http.MethodGet,
-			Path:          opts.path,
+			Path:          fmt.Sprintf("/api/v4/leads/%d/notes", ld.Id),
 			URLParameters: &opts,
 			Ret:           &tmpNotes,
 		})
@@ -148,7 +147,7 @@ func (ld *lead) noteMultiplyRequest(opts getNotesQueryParams) ([]*leadNote, erro
 		notes = append(notes, tmpNotes...)
 
 		if len(tmpNotes[0].Links.Next.Href) > 0 {
-			opts.page = opts.page + 1
+			opts.Page = opts.Page + 1
 		} else {
 			break
 		}
