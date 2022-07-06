@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/google/go-querystring/query"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -51,7 +52,7 @@ func httpRequest(opts requestOpts) error {
 	req.Header.Set("Content-Type", "application/json")
 
 	if opts.Path != "/oauth2/access_token" {
-		//TODO add auth header
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", client.accessToken))
 	}
 
 	log.Debugf("Request Headers: %s", req.Header)
@@ -81,8 +82,4 @@ func httpRequest(opts requestOpts) error {
 	}
 
 	return nil
-}
-
-func multiplyHttpRequest(opts requestOpts) {
-
 }
