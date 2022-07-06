@@ -67,6 +67,10 @@ func (c Cntct) All() ([]*contact, error) {
 	return contacts, nil
 }
 
+func (c Cntct) Query() (*contact, error) {
+	return nil, nil
+}
+
 func (c Cntct) multiplyRequest(opts GetContactsOpts) ([]*contact, error) {
 	var contacts []*contact
 
