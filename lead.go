@@ -49,23 +49,18 @@ type lead struct {
 }
 
 type allLeads struct {
-	Page  int `json:"_page"`
-	Links struct {
-		Self struct {
-			Href string `json:"href"`
-		} `json:"self"`
-		Next struct {
-			Href string `json:"href"`
-		} `json:"next"`
-		First struct {
-			Href string `json:"href"`
-		} `json:"first"`
-		Prev struct {
-			Href string `json:"href"`
-		} `json:"prev"`
-	} `json:"_links"`
+	Page     int   `json:"_page"`
+	Links    links `json:"_links"`
 	Embedded struct {
 		Leads []*lead `json:"leads"`
+	} `json:"_embedded"`
+}
+
+type allLeadsNotes struct {
+	Page     int   `json:"_page"`
+	Links    links `json:"_links"`
+	Embedded struct {
+		Notes []*leadNote `json:"notes"`
 	} `json:"_embedded"`
 }
 
@@ -132,21 +127,22 @@ func (ld *lead) noteMultiplyRequest(opts *GetNotesQueryParams) ([]*leadNote, err
 	}
 
 	for {
-		var tmpNotes []*leadNote
+		var tmpNotes allLeadsNotes
 
+		path := fmt.Sprintf("/api/v4/leads/%d/notes", ld.Id)
 		err := httpRequest(requestOpts{
 			Method:        http.MethodGet,
-			Path:          fmt.Sprintf("/api/v4/leads/%d/notes", ld.Id),
+			Path:          path,
 			URLParameters: &opts,
 			Ret:           &tmpNotes,
 		})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("ошибка обработки запроса %s: %s", path, err)
 		}
 
-		notes = append(notes, tmpNotes...)
+		notes = append(notes, tmpNotes.Embedded.Notes...)
 
-		if len(tmpNotes[0].Links.Next.Href) > 0 {
+		if len(tmpNotes.Links.Next.Href) > 0 {
 			opts.Page = opts.Page + 1
 		} else {
 			break
