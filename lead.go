@@ -8,7 +8,7 @@ import (
 type Ld struct{}
 type leadNote note
 
-type getLeadsQueryParams struct {
+type GetLeadsQueryParams struct {
 	With   []string    `url:"with,omitempty"`
 	Limit  int         `url:"limit,omitempty"`
 	Page   int         `url:"page,omitempty"`
@@ -69,7 +69,7 @@ func (l Ld) New() *lead {
 }
 
 func (l Ld) All() ([]*lead, error) {
-	leads, err := l.multiplyRequest(getContactsQueryParams{
+	leads, err := l.multiplyRequest(&GetLeadsQueryParams{
 		Limit: 250,
 	})
 	if err != nil {
@@ -79,7 +79,35 @@ func (l Ld) All() ([]*lead, error) {
 	return leads, nil
 }
 
-func (l Ld) multiplyRequest(opts getContactsQueryParams) ([]*lead, error) {
+func (l Ld) Query(params *GetLeadsQueryParams) ([]*lead, error) {
+	if params.Limit == 0 {
+		params.Limit = 250
+	}
+
+	leads, err := l.multiplyRequest(params)
+	if err != nil {
+		return nil, err
+	}
+
+	return leads, nil
+}
+
+func (l Ld) ByID(id int) (*lead, error) {
+	var ld *lead
+
+	err := httpRequest(requestOpts{
+		Method: http.MethodGet,
+		Path:   fmt.Sprintf("/api/v4/leads/%d", id),
+		Ret:    &ld,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return ld, nil
+}
+
+func (l Ld) multiplyRequest(params *GetLeadsQueryParams) ([]*lead, error) {
 	var leads []*lead
 
 	path := "/api/v4/leads"
@@ -90,7 +118,7 @@ func (l Ld) multiplyRequest(opts getContactsQueryParams) ([]*lead, error) {
 		err := httpRequest(requestOpts{
 			Method:        http.MethodGet,
 			Path:          path,
-			URLParameters: &opts,
+			URLParameters: &params,
 			Ret:           &tmpLeads,
 		})
 		if err != nil {
@@ -100,7 +128,7 @@ func (l Ld) multiplyRequest(opts getContactsQueryParams) ([]*lead, error) {
 		leads = append(leads, tmpLeads.Embedded.Leads...)
 
 		if len(tmpLeads.Links.Next.Href) > 0 {
-			opts.Page = tmpLeads.Page + 1
+			params.Page = tmpLeads.Page + 1
 		} else {
 			break
 		}

@@ -1,16 +1,27 @@
 package amocrm_v4
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 type Ct struct{}
 
-type getContactsQueryParams struct {
-	With   []string    `url:"with,omitempty"`
-	Limit  int         `url:"limit,omitempty"`
-	Page   int         `url:"page,omitempty"`
-	Query  interface{} `url:"query,omitempty"`
-	Filter interface{} `url:"filter,omitempty"`
-	Order  interface{} `url:"order,omitempty"`
+type ContactWithType string
+
+const (
+	ContactWithLeads           ContactWithType = "leads"
+	ContactWithCustomers       ContactWithType = "customers"
+	ContactWithCatalogElements ContactWithType = "catalog_elements"
+)
+
+type GetContactsQueryParams struct {
+	With   []ContactWithType `url:"with,omitempty"`
+	Limit  int               `url:"limit,omitempty"`
+	Page   int               `url:"page,omitempty"`
+	Query  interface{}       `url:"query,omitempty"`
+	Filter interface{}       `url:"filter,omitempty"`
+	Order  interface{}       `url:"order,omitempty"`
 }
 
 type contact struct {
@@ -29,8 +40,11 @@ type contact struct {
 	AccountId          int         `json:"account_id"`
 	Links              links       `json:"_links"`
 	Embedded           struct {
-		Tags      []interface{} `json:"tags"`
-		Companies []interface{} `json:"companies"`
+		Customers       []interface{} `json:"customers"`
+		Leads           []*lead       `json:"leads"`
+		CatalogElements []interface{} `json:"catalog_elements"`
+		Tags            []interface{} `json:"tags"`
+		Companies       []interface{} `json:"companies"`
 	} `json:"_embedded"`
 }
 
@@ -48,7 +62,7 @@ func (c Ct) New() *contact {
 }
 
 func (c Ct) All() ([]*contact, error) {
-	contacts, err := c.multiplyRequest(getContactsQueryParams{
+	contacts, err := c.multiplyRequest(&GetContactsQueryParams{
 		Limit: 250,
 	})
 	if err != nil {
@@ -58,11 +72,40 @@ func (c Ct) All() ([]*contact, error) {
 	return contacts, nil
 }
 
-func (c Ct) Query() (*contact, error) {
-	return nil, nil
+func (c Ct) Query(params *GetContactsQueryParams) ([]*contact, error) {
+	if params.Limit == 0 {
+		params.Limit = 250
+	}
+
+	contacts, err := c.multiplyRequest(params)
+	if err != nil {
+		return nil, err
+	}
+
+	return contacts, nil
 }
 
-func (c Ct) multiplyRequest(opts getContactsQueryParams) ([]*contact, error) {
+func (c Ct) ByID(id int, with []ContactWithType) (*contact, error) {
+	var ct *contact
+
+	opts := GetContactsQueryParams{
+		With: with,
+	}
+
+	err := httpRequest(requestOpts{
+		Method:        http.MethodGet,
+		Path:          fmt.Sprintf("/api/v4/contacts/%d", id),
+		URLParameters: &opts,
+		Ret:           &ct,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return ct, nil
+}
+
+func (c Ct) multiplyRequest(opts *GetContactsQueryParams) ([]*contact, error) {
 	var contacts []*contact
 
 	path := "/api/v4/contacts"
