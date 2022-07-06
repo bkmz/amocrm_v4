@@ -92,7 +92,7 @@ func (c Cntct) multiplyRequest(opts GetContactsOpts) ([]*contact, error) {
 		contacts = append(contacts, tmpContacts.Embedded.Contacts...)
 
 		if len(tmpContacts.Links.Next.Href) > 0 {
-			path = tmpContacts.Links.Next.Href
+			opts.Page = tmpContacts.Page + 1
 		} else {
 			break
 		}
