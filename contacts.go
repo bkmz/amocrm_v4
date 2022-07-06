@@ -2,7 +2,15 @@ package amocrm_v4
 
 import "net/http"
 
-type Cntct struct {
+type Cntct struct{}
+
+type GetContactsOpts struct {
+	With   []string    `url:"with,omitempty"`
+	Limit  int         `url:"limit,omitempty"`
+	Page   int         `url:"page,omitempty"`
+	Query  interface{} `url:"query,omitempty"`
+	Filter interface{} `url:"filter,omitempty"`
+	Order  interface{} `url:"order,omitempty"`
 }
 
 type contact struct {
@@ -51,7 +59,7 @@ func (c Cntct) Create() *contact {
 }
 
 func (c Cntct) All() ([]*contact, error) {
-	contacts, err := c.multiplyRequest(map[string]interface{}{})
+	contacts, err := c.multiplyRequest(GetContactsOpts{})
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +67,7 @@ func (c Cntct) All() ([]*contact, error) {
 	return contacts, nil
 }
 
-func (c Cntct) multiplyRequest(q map[string]interface{}) ([]*contact, error) {
+func (c Cntct) multiplyRequest(opts GetContactsOpts) ([]*contact, error) {
 	var contacts []*contact
 
 	path := "/api/v4/contacts"
@@ -67,14 +75,12 @@ func (c Cntct) multiplyRequest(q map[string]interface{}) ([]*contact, error) {
 	for {
 		var tmpContacts allContacts
 
-		opts := requestOpts{
+		err := httpRequest(requestOpts{
 			Method:        http.MethodGet,
 			Path:          path,
-			URLParameters: map[string]string{},
+			URLParameters: &opts,
 			Ret:           &tmpContacts,
-		}
-
-		err := httpRequest(opts)
+		})
 		if err != nil {
 			return nil, err
 		}
