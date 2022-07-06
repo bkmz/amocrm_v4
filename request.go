@@ -82,3 +82,7 @@ func httpRequest(opts requestOpts) error {
 
 	return nil
 }
+
+func multiplyHttpRequest(opts requestOpts) {
+
+}

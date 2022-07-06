@@ -6,7 +6,7 @@ import (
 )
 
 type amo struct {
-	//Client *client
+	Contact Cntct
 }
 
 type authSettings struct {
