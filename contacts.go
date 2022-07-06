@@ -2,9 +2,9 @@ package amocrm_v4
 
 import "net/http"
 
-type Cntct struct{}
+type Ct struct{}
 
-type GetContactsOpts struct {
+type getContactsQueryParams struct {
 	With   []string    `url:"with,omitempty"`
 	Limit  int         `url:"limit,omitempty"`
 	Page   int         `url:"page,omitempty"`
@@ -27,39 +27,28 @@ type contact struct {
 	ClosestTaskAt      interface{} `json:"closest_task_at"`
 	CustomFieldsValues interface{} `json:"custom_fields_values"`
 	AccountId          int         `json:"account_id"`
-	Links              struct {
-		Self struct {
-			Href string `json:"href"`
-		} `json:"self"`
-	} `json:"_links"`
-	Embedded struct {
+	Links              links       `json:"_links"`
+	Embedded           struct {
 		Tags      []interface{} `json:"tags"`
 		Companies []interface{} `json:"companies"`
 	} `json:"_embedded"`
 }
 
 type allContacts struct {
-	Page  int `json:"_page"`
-	Links struct {
-		Self struct {
-			Href string `json:"href"`
-		} `json:"self"`
-		Next struct {
-			Href string `json:"href"`
-		} `json:"next"`
-	} `json:"_links"`
+	Page     int   `json:"_page"`
+	Links    links `json:"_links"`
 	Embedded struct {
 		Contacts []*contact `json:"contacts"`
 	} `json:"_embedded"`
 }
 
-// Create Method creates empty struct
-func (c Cntct) Create() *contact {
+// New Method creates empty struct
+func (c Ct) New() *contact {
 	return &contact{}
 }
 
-func (c Cntct) All() ([]*contact, error) {
-	contacts, err := c.multiplyRequest(GetContactsOpts{
+func (c Ct) All() ([]*contact, error) {
+	contacts, err := c.multiplyRequest(getContactsQueryParams{
 		Limit: 250,
 	})
 	if err != nil {
@@ -69,11 +58,11 @@ func (c Cntct) All() ([]*contact, error) {
 	return contacts, nil
 }
 
-func (c Cntct) Query() (*contact, error) {
+func (c Ct) Query() (*contact, error) {
 	return nil, nil
 }
 
-func (c Cntct) multiplyRequest(opts GetContactsOpts) ([]*contact, error) {
+func (c Ct) multiplyRequest(opts getContactsQueryParams) ([]*contact, error) {
 	var contacts []*contact
 
 	path := "/api/v4/contacts"
