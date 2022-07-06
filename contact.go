@@ -6,6 +6,7 @@ import (
 )
 
 type Ct struct{}
+type contactNote note
 
 type ContactWithType string
 
@@ -56,6 +57,14 @@ type allContacts struct {
 	} `json:"_embedded"`
 }
 
+type allContactNotes struct {
+	Page     int   `json:"_page"`
+	Links    links `json:"_links"`
+	Embedded struct {
+		Notes []*contactNote `json:"notes"`
+	} `json:"_embedded"`
+}
+
 // New Method creates empty struct
 func (c Ct) New() *contact {
 	return &contact{}
@@ -103,6 +112,54 @@ func (c Ct) ByID(id int, with []ContactWithType) (*contact, error) {
 	}
 
 	return ct, nil
+}
+
+func (ct *contact) Notes() ([]*contactNote, error) {
+	var notes []*contactNote
+
+	err := httpRequest(requestOpts{
+		Method: http.MethodGet,
+		Path:   fmt.Sprintf("/api/v4/contacts/%d/notes", ct.Id),
+		Ret:    &notes,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return notes, nil
+}
+
+func (ct *contact) noteMultiplyRequest(opts *GetNotesQueryParams) ([]*contactNote, error) {
+	var notes []*contactNote
+
+	if opts.Limit == 0 {
+		opts.Limit = 250
+	}
+
+	for {
+		var tmpNotes allContactNotes
+
+		path := fmt.Sprintf("/api/v4/contacts/%d/notes", ct.Id)
+		err := httpRequest(requestOpts{
+			Method:        http.MethodGet,
+			Path:          path,
+			URLParameters: &opts,
+			Ret:           &tmpNotes,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("ошибка обработки запроса %s: %s", path, err)
+		}
+
+		notes = append(notes, tmpNotes.Embedded.Notes...)
+
+		if len(tmpNotes.Links.Next.Href) > 0 {
+			opts.Page = opts.Page + 1
+		} else {
+			break
+		}
+	}
+
+	return notes, nil
 }
 
 func (c Ct) multiplyRequest(opts *GetContactsQueryParams) ([]*contact, error) {
