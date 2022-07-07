@@ -38,12 +38,12 @@ const (
 
 type note struct {
 	Id                int            `json:"id,omitempty"`
-	EntityId          int            `json:"entity_id"`
+	EntityId          int            `json:"entity_id,omitempty"`
 	CreatedBy         int            `json:"created_by,omitempty"`
 	UpdatedBy         int            `json:"updated_by,omitempty"`
 	CreatedAt         int            `json:"created_at,omitempty"`
 	UpdatedAt         int            `json:"updated_at,omitempty"`
-	ResponsibleUserId int            `json:"responsible_user_id"`
+	ResponsibleUserId int            `json:"responsible_user_id,omitempty"`
 	GroupId           int            `json:"group_id,omitempty"`
 	NoteType          NoteType       `json:"note_type"`
 	Params            noteParams     `json:"params"`
@@ -85,7 +85,7 @@ type GetNotesQueryParams struct {
 
 type allNotes struct {
 	Page     int   `json:"_page"`
-	Links    links `json:"_links"`
+	Links    links `json:"_links,omitempty"`
 	Embedded struct {
 		Notes []*note `json:"notes"`
 	} `json:"_embedded"`
