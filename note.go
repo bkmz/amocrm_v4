@@ -93,14 +93,16 @@ type allNotes struct {
 
 // Create выполняет запрос на создание заметки
 func (n *note) Create() (*allNotes, error) {
-	path := fmt.Sprintf("/api/v4/%s/%d/notes", n.EntityType, n.EntityId)
+	path := fmt.Sprintf("/api/v4/%s/notes", n.EntityType)
+
+	req := []note{*n}
 
 	ret := allNotes{}
 
 	return &ret, httpRequest(requestOpts{
 		Path:           path,
 		Method:         http.MethodPost,
-		DataParameters: &n,
+		DataParameters: &req,
 		Ret:            &ret,
 	})
 }
