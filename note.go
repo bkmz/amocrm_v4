@@ -45,7 +45,7 @@ type note struct {
 	UpdatedAt         int            `json:"updated_at,omitempty"`
 	ResponsibleUserId int            `json:"responsible_user_id"`
 	GroupId           int            `json:"group_id,omitempty"`
-	NoteType          string         `json:"note_type"`
+	NoteType          NoteType       `json:"note_type"`
 	Params            noteParams     `json:"params"`
 	AccountId         int            `json:"account_id,omitempty"`
 	Links             links          `json:"_links,omitempty"`
