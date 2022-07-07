@@ -1,6 +1,14 @@
 package amocrm_v4
 
+import (
+	"fmt"
+	"net/http"
+)
+
+type Nt struct{}
+
 type NoteType string
+type NoteEntityType string
 type MessageCashierNoteStatusType string
 
 const (
@@ -23,19 +31,26 @@ const (
 	MessageCashierNoteStatusCanceled MessageCashierNoteStatusType = "canceled"
 )
 
+const (
+	NoteEntityTypeLead    NoteEntityType = "leads"
+	NoteEntityTypeContact NoteEntityType = "contacts"
+)
+
 type note struct {
-	Id                int        `json:"id"`
-	EntityId          int        `json:"entity_id"`
-	CreatedBy         int        `json:"created_by"`
-	UpdatedBy         int        `json:"updated_by"`
-	CreatedAt         int        `json:"created_at"`
-	UpdatedAt         int        `json:"updated_at"`
-	ResponsibleUserId int        `json:"responsible_user_id"`
-	GroupId           int        `json:"group_id"`
-	NoteType          string     `json:"note_type"`
-	Params            noteParams `json:"params"`
-	AccountId         int        `json:"account_id"`
-	Links             links      `json:"_links"`
+	Id                int            `json:"id,omitempty"`
+	EntityId          int            `json:"entity_id"`
+	CreatedBy         int            `json:"created_by,omitempty"`
+	UpdatedBy         int            `json:"updated_by,omitempty"`
+	CreatedAt         int            `json:"created_at,omitempty"`
+	UpdatedAt         int            `json:"updated_at,omitempty"`
+	ResponsibleUserId int            `json:"responsible_user_id"`
+	GroupId           int            `json:"group_id,omitempty"`
+	NoteType          string         `json:"note_type"`
+	Params            noteParams     `json:"params"`
+	AccountId         int            `json:"account_id,omitempty"`
+	Links             links          `json:"_links,omitempty"`
+	RequestId         string         `json:"request_id,omitempty"`
+	EntityType        NoteEntityType `json:"-"`
 }
 
 type noteParams struct {
@@ -74,6 +89,20 @@ type allNotes struct {
 	Embedded struct {
 		Notes []*note `json:"notes"`
 	} `json:"_embedded"`
+}
+
+// Create выполняет запрос на создание заметки
+func (n *note) Create() (*allNotes, error) {
+	path := fmt.Sprintf("/api/v4/%s/%d/notes", n.EntityType, n.EntityId)
+
+	ret := allNotes{}
+
+	return &ret, httpRequest(requestOpts{
+		Path:           path,
+		Method:         http.MethodPost,
+		DataParameters: &n,
+		Ret:            &ret,
+	})
 }
 
 //func noteMultiplyRequest(params GetNotesQueryParams) ([]*note, error) {

@@ -70,6 +70,13 @@ func (c Ct) New() *contact {
 	return &contact{}
 }
 
+func (ct *contact) NewNote() *note {
+	return &note{
+		EntityId:   ct.Id,
+		EntityType: NoteEntityTypeContact,
+	}
+}
+
 func (c Ct) All() ([]*contact, error) {
 	contacts, err := c.multiplyRequest(&GetContactsQueryParams{
 		Limit: 250,
