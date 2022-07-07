@@ -3,7 +3,6 @@ package amocrm_v4
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/google/go-querystring/query"
 	log "github.com/sirupsen/logrus"
@@ -18,6 +17,21 @@ type requestOpts struct {
 	URLParameters  interface{}
 	DataParameters interface{}
 	Ret            interface{}
+}
+
+type errorResponse struct {
+	ValidationErrors []struct {
+		RequestId string `json:"request_id"`
+		Errors    []struct {
+			Code   string `json:"code"`
+			Path   string `json:"path"`
+			Detail string `json:"detail"`
+		} `json:"errors"`
+	} `json:"validation-errors"`
+	Title  string `json:"title"`
+	Type   string `json:"type"`
+	Status int    `json:"status"`
+	Detail string `json:"detail"`
 }
 
 func httpRequest(opts requestOpts) error {
@@ -81,7 +95,7 @@ func httpRequest(opts requestOpts) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New(resp.Status)
+		return fmt.Errorf("%s: %s", resp.Status, errorResponseFormat(body))
 	}
 
 	err = json.Unmarshal(body, &opts.Ret)
@@ -90,4 +104,22 @@ func httpRequest(opts requestOpts) error {
 	}
 
 	return nil
+}
+
+func errorResponseFormat(body []byte) string {
+	resp := errorResponse{}
+
+	err := json.Unmarshal(body, &resp)
+	if err != nil {
+		return fmt.Sprintf("%s", err)
+	}
+
+	errorString := ""
+	for _, vErr := range resp.ValidationErrors {
+		for _, v := range vErr.Errors {
+			errorString += fmt.Sprintf("%s - %s: %s\n", v.Path, v.Code, v.Detail)
+		}
+	}
+
+	return errorString
 }
