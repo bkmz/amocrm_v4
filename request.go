@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type requestOpts struct {
@@ -114,12 +115,12 @@ func errorResponseFormat(body []byte) string {
 		return fmt.Sprintf("%s", err)
 	}
 
-	errorString := ""
+	var errorString []string
 	for _, vErr := range resp.ValidationErrors {
 		for _, v := range vErr.Errors {
-			errorString += fmt.Sprintf("%s - %s: %s\n", v.Path, v.Code, v.Detail)
+			errorString = append(errorString, fmt.Sprintf("%s: %s", v.Path, v.Detail))
 		}
 	}
 
-	return errorString
+	return strings.Join(errorString, " | ")
 }
