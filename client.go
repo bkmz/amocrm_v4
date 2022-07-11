@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type amo struct {
+type Amo struct {
 	Contact Ct
 	Lead    Ld
 }
@@ -39,10 +39,10 @@ type AmoAuthorizationDataStorage struct {
 	ConnectURI string `json:"connect_uri"`
 }
 
-func NewClient(initConfig *InitAmoConfig, storageConfig *AuthAmoStorageConfig) *amo {
+func NewClient(initConfig *InitAmoConfig, storageConfig *AuthAmoStorageConfig) *Amo {
 	err := createConnection(initConfig, storageConfig)
 	if err != nil {
 		panic(err)
 	}
-	return &amo{}
+	return &Amo{}
 }
