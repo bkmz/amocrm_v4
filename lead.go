@@ -19,35 +19,37 @@ type GetLeadsQueryParams struct {
 }
 
 type lead struct {
-	Id                 int         `json:"id"`
-	Name               string      `json:"name"`
-	Price              int         `json:"price"`
-	ResponsibleUserId  int         `json:"responsible_user_id"`
-	GroupId            int         `json:"group_id"`
-	StatusId           int         `json:"status_id"`
-	PipelineId         int         `json:"pipeline_id"`
-	LossReasonId       interface{} `json:"loss_reason_id"`
-	SourceId           interface{} `json:"source_id"`
-	CreatedBy          int         `json:"created_by"`
-	UpdatedBy          int         `json:"updated_by"`
-	CreatedAt          int         `json:"created_at"`
-	UpdatedAt          int         `json:"updated_at"`
-	ClosedAt           int         `json:"closed_at"`
-	ClosestTaskAt      interface{} `json:"closest_task_at"`
-	IsDeleted          bool        `json:"is_deleted"`
-	CustomFieldsValues interface{} `json:"custom_fields_values"`
-	Score              interface{} `json:"score"`
-	AccountId          int         `json:"account_id"`
-	Links              links       `json:"_links"`
+	Id                 int         `json:"id,omitempty"`
+	Name               string      `json:"name,omitempty"`
+	Price              int         `json:"price,omitempty"`
+	ResponsibleUserId  int         `json:"responsible_user_id,omitempty"`
+	GroupId            int         `json:"group_id,omitempty"`
+	StatusId           int         `json:"status_id,omitempty"`
+	PipelineId         int         `json:"pipeline_id,omitempty"`
+	LossReasonId       interface{} `json:"loss_reason_id,omitempty"`
+	SourceId           interface{} `json:"source_id,omitempty"`
+	CreatedBy          int         `json:"created_by,omitempty"`
+	UpdatedBy          int         `json:"updated_by,omitempty"`
+	CreatedAt          int         `json:"created_at,omitempty"`
+	UpdatedAt          int         `json:"updated_at,omitempty"`
+	ClosedAt           int         `json:"closed_at,omitempty"`
+	ClosestTaskAt      interface{} `json:"closest_task_at,omitempty"`
+	IsDeleted          bool        `json:"is_deleted,omitempty"`
+	CustomFieldsValues interface{} `json:"custom_fields_values,omitempty"`
+	Score              interface{} `json:"score,omitempty"`
+	AccountId          int         `json:"account_id,omitempty"`
+	Links              links       `json:"_links,omitempty"`
 	Embedded           struct {
-		Tags      []interface{} `json:"tags"`
-		Companies []interface{} `json:"companies"`
+		Tags      []Tag         `json:"tags,omitempty"`
+		Companies []interface{} `json:"companies,omitempty"`
 		Contacts  []struct {
-			Id     int  `json:"id"`
-			IsMain bool `json:"is_main"`
-		} `json:"contacts"`
+			Id     int  `json:"id,omitempty"`
+			IsMain bool `json:"is_main,omitempty"`
+		} `json:"contacts,omitempty"`
 	} `json:"_embedded"`
 }
+
+type Leads []*lead
 
 type allLeads struct {
 	Page     int   `json:"_page"`
@@ -67,6 +69,17 @@ type allLeadsNotes struct {
 
 func (l Ld) New() *lead {
 	return &lead{}
+}
+
+func (l Ld) Create(leads Leads) (*allLeads, error) {
+	ret := allLeads{}
+
+	return &ret, httpRequest(requestOpts{
+		Method:         http.MethodPost,
+		Path:           "/api/v4/leads",
+		DataParameters: &leads,
+		Ret:            &ret,
+	})
 }
 
 func (l Ld) All() ([]*lead, error) {
