@@ -6,7 +6,8 @@ import (
 )
 
 type Ld struct{}
-type leadNote note
+
+//type leadNote note
 
 type GetLeadsQueryParams struct {
 	With   []string    `url:"with,omitempty"`
@@ -41,6 +42,10 @@ type lead struct {
 	Embedded           struct {
 		Tags      []interface{} `json:"tags"`
 		Companies []interface{} `json:"companies"`
+		Contacts  []struct {
+			Id     int  `json:"id"`
+			IsMain bool `json:"is_main"`
+		} `json:"contacts"`
 	} `json:"_embedded"`
 }
 
@@ -56,7 +61,7 @@ type allLeadsNotes struct {
 	Page     int   `json:"_page"`
 	Links    links `json:"_links"`
 	Embedded struct {
-		Notes []*leadNote `json:"notes"`
+		Notes []*note `json:"notes"`
 	} `json:"_embedded"`
 }
 
@@ -103,7 +108,7 @@ func (l Ld) ByID(id int) (*lead, error) {
 	return ld, nil
 }
 
-func (ld *lead) Notes(params *GetNotesQueryParams) ([]*leadNote, error) {
+func (ld *lead) Notes(params *GetNotesQueryParams) ([]*note, error) {
 	notes, err := ld.noteMultiplyRequest(params)
 
 	if err != nil {
@@ -143,8 +148,8 @@ func (l Ld) multiplyRequest(params *GetLeadsQueryParams) ([]*lead, error) {
 	return leads, nil
 }
 
-func (ld *lead) noteMultiplyRequest(opts *GetNotesQueryParams) ([]*leadNote, error) {
-	var notes []*leadNote
+func (ld *lead) noteMultiplyRequest(opts *GetNotesQueryParams) ([]*note, error) {
+	var notes []*note
 
 	if opts.Limit == 0 {
 		opts.Limit = 250
@@ -176,15 +181,6 @@ func (ld *lead) noteMultiplyRequest(opts *GetNotesQueryParams) ([]*leadNote, err
 	return notes, nil
 }
 
-func (ldn *leadNote) New() *leadNote {
-	return &leadNote{}
-}
-
-func (ldn *leadNote) Delete() error {
-	return httpRequest(requestOpts{
-		Method:        http.MethodDelete,
-		Path:          fmt.Sprintf("/api/v4/leads/%d/notes/%d", ldn.EntityId, ldn.Id),
-		URLParameters: nil,
-		Ret:           nil,
-	})
-}
+//func (ldn *leadNote) New() *leadNote {
+//	return &leadNote{}
+//}
