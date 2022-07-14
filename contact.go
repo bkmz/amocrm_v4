@@ -26,25 +26,27 @@ type GetContactsQueryParams struct {
 }
 
 type contact struct {
-	Id                 int         `json:"id"`
-	Name               string      `json:"name"`
-	FirstName          string      `json:"first_name"`
-	LastName           string      `json:"last_name"`
-	ResponsibleUserId  int         `json:"responsible_user_id"`
-	GroupId            int         `json:"group_id"`
-	CreatedBy          int         `json:"created_by"`
-	UpdatedBy          int         `json:"updated_by"`
-	CreatedAt          int         `json:"created_at"`
-	UpdatedAt          int         `json:"updated_at"`
-	ClosestTaskAt      interface{} `json:"closest_task_at"`
-	CustomFieldsValues interface{} `json:"custom_fields_values"`
-	AccountId          int         `json:"account_id"`
-	Links              links       `json:"_links"`
+	Id                 int           `json:"id"`
+	Name               string        `json:"name"`
+	FirstName          string        `json:"first_name"`
+	LastName           string        `json:"last_name"`
+	ResponsibleUserId  int           `json:"responsible_user_id"`
+	GroupId            int           `json:"group_id"`
+	CreatedBy          int           `json:"created_by"`
+	UpdatedBy          int           `json:"updated_by"`
+	CreatedAt          int           `json:"created_at"`
+	UpdatedAt          int           `json:"updated_at"`
+	ClosestTaskAt      interface{}   `json:"closest_task_at"`
+	IsDeleted          bool          `json:"is_deleted,omitempty"`
+	IsUnsorted         bool          `json:"is_unsorted,omitempty"`
+	CustomFieldsValues []CustomField `json:"custom_fields_values"`
+	AccountId          int           `json:"account_id"`
+	Links              links         `json:"_links"`
 	Embedded           struct {
 		Customers       []interface{} `json:"customers"`
 		Leads           []*lead       `json:"leads"`
 		CatalogElements []interface{} `json:"catalog_elements"`
-		Tags            []interface{} `json:"tags"`
+		Tags            []Tag         `json:"tags"`
 		Companies       []interface{} `json:"companies"`
 	} `json:"_embedded"`
 }
@@ -68,6 +70,13 @@ type allContactNotes struct {
 // New Method creates empty struct
 func (c Ct) New() *contact {
 	return &contact{}
+}
+
+func (ct *contact) NewTask() *task {
+	return &task{
+		EntityType: TaskForContact,
+		EntityId:   ct.Id,
+	}
 }
 
 func (ct *contact) NewNote() *note {
