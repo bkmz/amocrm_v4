@@ -8,6 +8,8 @@ import (
 type Amo struct {
 	Contact Ct
 	Lead    Ld
+	Task    Tsk
+	Catalog Ctg
 }
 
 type authSettings struct {
