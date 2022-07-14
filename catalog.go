@@ -62,7 +62,7 @@ type allCatalogs struct {
 	Page     int   `json:"_page"`
 	Links    links `json:"_links"`
 	Embedded struct {
-		Catalogs []*catalog `json:"catalogs"`
+		Catalogs Catalogs `json:"catalogs"`
 	} `json:"_embedded"`
 }
 
@@ -93,13 +93,13 @@ type allCatalogElements struct {
 }
 
 //All Метод позволяет получить доступные списки в аккаунте.
-func (c Ctg) All() (*allCatalogs, error) {
+func (c Ctg) All() (*Catalogs, error) {
 	req := GetCatalogsQueryParams{
 		Limit: 250,
 	}
 	ret := allCatalogs{}
 
-	return &ret, httpRequest(requestOpts{
+	return &ret.Embedded.Catalogs, httpRequest(requestOpts{
 		Method:        http.MethodGet,
 		Path:          "/api/v4/catalogs",
 		URLParameters: req,
