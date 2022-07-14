@@ -6,8 +6,31 @@ import (
 )
 
 type Ld struct{}
+type LeadWithType string
 
-//type leadNote note
+const (
+	// LeadWithCatalogElements Добавляет в ответ связанные со сделками элементы списков
+	LeadWithCatalogElements LeadWithType = "catalog_elements"
+
+	// LeadWithIsPriceModifiedByRobot Добавляет в ответ свойство, показывающее,
+	// изменен ли в последний раз бюджет сделки роботом
+	LeadWithIsPriceModifiedByRobot LeadWithType = "is_price_modified_by_robot"
+
+	// LeadWithLossReason Добавляет в ответ расширенную информацию по причине отказа
+	LeadWithLossReason LeadWithType = "loss_reason"
+
+	// LeadWithContacts Добавляет в ответ информацию о связанных со сделкой контактах
+	LeadWithContacts LeadWithType = "contacts"
+
+	// LeadWithOnlyDeleted Если передать данный параметр, то в ответе на запрос метода,
+	// вернутся удаленные сделки, которые еще находятся в корзине. В ответ вы получите модель сделки,
+	// у которой доступны дату изменения, ID пользователя сделавшего последнее изменение,
+	// её ID и параметр is_deleted = true.
+	LeadWithOnlyDeleted LeadWithType = "only_deleted"
+
+	// LeadWithSourceID Добавляет в ответ ID источника
+	LeadWithSourceID LeadWithType = "source_id"
+)
 
 type GetLeadsQueryParams struct {
 	With   []string    `url:"with,omitempty"`
@@ -19,34 +42,47 @@ type GetLeadsQueryParams struct {
 }
 
 type lead struct {
-	Id                 int         `json:"id,omitempty"`
-	Name               string      `json:"name,omitempty"`
-	Price              int         `json:"price,omitempty"`
-	ResponsibleUserId  int         `json:"responsible_user_id,omitempty"`
-	GroupId            int         `json:"group_id,omitempty"`
-	StatusId           int         `json:"status_id,omitempty"`
-	PipelineId         int         `json:"pipeline_id,omitempty"`
-	LossReasonId       interface{} `json:"loss_reason_id,omitempty"`
-	SourceId           interface{} `json:"source_id,omitempty"`
-	CreatedBy          int         `json:"created_by,omitempty"`
-	UpdatedBy          int         `json:"updated_by,omitempty"`
-	CreatedAt          int         `json:"created_at,omitempty"`
-	UpdatedAt          int         `json:"updated_at,omitempty"`
-	ClosedAt           int         `json:"closed_at,omitempty"`
-	ClosestTaskAt      interface{} `json:"closest_task_at,omitempty"`
-	IsDeleted          bool        `json:"is_deleted,omitempty"`
-	CustomFieldsValues interface{} `json:"custom_fields_values,omitempty"`
-	Score              interface{} `json:"score,omitempty"`
-	AccountId          int         `json:"account_id,omitempty"`
-	Links              links       `json:"_links,omitempty"`
-	Embedded           struct {
-		Tags      []Tag         `json:"tags,omitempty"`
-		Companies []interface{} `json:"companies,omitempty"`
-		Contacts  []struct {
+	Id                     int           `json:"id,omitempty"`                         //ID сделки
+	Name                   string        `json:"name,omitempty"`                       //Название сделки
+	Price                  int           `json:"price,omitempty"`                      //Бюджет сделки
+	ResponsibleUserId      int           `json:"responsible_user_id,omitempty"`        //ID пользователя, ответственного за сделку
+	GroupId                int           `json:"group_id,omitempty"`                   //ID группы, в которой состоит ответственны пользователь за сделку
+	StatusId               int           `json:"status_id,omitempty"`                  //ID статуса, в который добавляется сделка, по-умолчанию – первый этап главной воронки
+	PipelineId             int           `json:"pipeline_id,omitempty"`                //ID воронки, в которую добавляется сделка
+	LossReasonId           interface{}   `json:"loss_reason_id,omitempty"`             //ID причины отказа
+	SourceId               interface{}   `json:"source_id,omitempty"`                  //Требуется GET параметр with. ID источника сделки
+	CreatedBy              int           `json:"created_by,omitempty"`                 //ID пользователя, создающий сделку
+	UpdatedBy              int           `json:"updated_by,omitempty"`                 //ID пользователя, изменяющий сделку
+	CreatedAt              int           `json:"created_at,omitempty"`                 //Дата создания сделки, передается в Unix Timestamp
+	UpdatedAt              int           `json:"updated_at,omitempty"`                 //Дата изменения сделки, передается в Unix Timestamp
+	ClosedAt               int           `json:"closed_at,omitempty"`                  //Дата закрытия сделки, передается в Unix Timestamp
+	ClosestTaskAt          interface{}   `json:"closest_task_at,omitempty"`            //Дата ближайшей задачи к выполнению, передается в Unix Timestamp
+	IsDeleted              bool          `json:"is_deleted,omitempty"`                 //Удалена ли сделка
+	CustomFieldsValues     []CustomField `json:"custom_fields_values,omitempty"`       //Массив, содержащий информацию по значениям дополнительных полей, заданных для данной сделки
+	Score                  interface{}   `json:"score,omitempty"`                      //Скоринг сделки
+	AccountId              int           `json:"account_id,omitempty"`                 //ID аккаунта, в котором находится сделка
+	IsPriceModifiedByRobot bool          `json:"is_price_modified_by_robot,omitempty"` //Требуется GET параметр with. Изменен ли в последний раз бюджет сделки роботом
+	Embedded               struct {
+		Tags     []Tag `json:"tags,omitempty"`
+		Contacts []struct {
 			Id     int  `json:"id,omitempty"`
 			IsMain bool `json:"is_main,omitempty"`
 		} `json:"contacts,omitempty"`
+		Companies []struct {
+			Id int `json:"id,omitempty"`
+		} `json:"companies,omitempty"`
+		CatalogElements []struct {
+			Id        int         `json:"id,omitempty"`
+			Metadata  interface{} `json:"metadata,omitempty"`
+			Quantity  int         `json:"quantity,omitempty"`
+			CatalogId int         `json:"catalog_id,omitempty"`
+		} `json:"catalog_elements,omitempty"`
 	} `json:"_embedded"`
+	Links struct {
+		Self struct {
+			Href string `json:"href,omitempty"`
+		} `json:"self,omitempty"`
+	} `json:"_links,omitempty"`
 }
 
 type Leads []*lead
@@ -59,16 +95,15 @@ type allLeads struct {
 	} `json:"_embedded"`
 }
 
-type allLeadsNotes struct {
-	Page     int   `json:"_page"`
-	Links    links `json:"_links"`
-	Embedded struct {
-		Notes []*note `json:"notes"`
-	} `json:"_embedded"`
-}
-
 func (l Ld) New() *lead {
 	return &lead{}
+}
+
+func (l *lead) NewTask() *task {
+	return &task{
+		EntityType: TaskForLead,
+		EntityId:   l.Id,
+	}
 }
 
 func (l Ld) Create(leads Leads) (*allLeads, error) {
@@ -76,6 +111,17 @@ func (l Ld) Create(leads Leads) (*allLeads, error) {
 
 	return &ret, httpRequest(requestOpts{
 		Method:         http.MethodPost,
+		Path:           "/api/v4/leads",
+		DataParameters: &leads,
+		Ret:            &ret,
+	})
+}
+
+func (l Ld) Update(leads Leads) (*allLeads, error) {
+	ret := allLeads{}
+
+	return &ret, httpRequest(requestOpts{
+		Method:         http.MethodPatch,
 		Path:           "/api/v4/leads",
 		DataParameters: &leads,
 		Ret:            &ret,
@@ -121,16 +167,6 @@ func (l Ld) ByID(id int) (*lead, error) {
 	return ld, nil
 }
 
-func (ld *lead) Notes(params *GetNotesQueryParams) ([]*note, error) {
-	notes, err := ld.noteMultiplyRequest(params)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return notes, nil
-}
-
 func (l Ld) multiplyRequest(params *GetLeadsQueryParams) ([]*lead, error) {
 	var leads []*lead
 
@@ -160,40 +196,3 @@ func (l Ld) multiplyRequest(params *GetLeadsQueryParams) ([]*lead, error) {
 
 	return leads, nil
 }
-
-func (ld *lead) noteMultiplyRequest(opts *GetNotesQueryParams) ([]*note, error) {
-	var notes []*note
-
-	if opts.Limit == 0 {
-		opts.Limit = 250
-	}
-
-	for {
-		var tmpNotes allLeadsNotes
-
-		path := fmt.Sprintf("/api/v4/leads/%d/notes", ld.Id)
-		err := httpRequest(requestOpts{
-			Method:        http.MethodGet,
-			Path:          path,
-			URLParameters: &opts,
-			Ret:           &tmpNotes,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("ошибка обработки запроса %s: %s", path, err)
-		}
-
-		notes = append(notes, tmpNotes.Embedded.Notes...)
-
-		if len(tmpNotes.Links.Next.Href) > 0 {
-			opts.Page = opts.Page + 1
-		} else {
-			break
-		}
-	}
-
-	return notes, nil
-}
-
-//func (ldn *leadNote) New() *leadNote {
-//	return &leadNote{}
-//}
